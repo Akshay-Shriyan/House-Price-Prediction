@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bangalore Home Price Predictor — Compare & Explain</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #f5f7fa; --card:#fff; --muted:#6b7280; --accent:#4b7bec; --success:#27ae60;
+      --glass: rgba(255,255,255,0.7);
+    }
+    [data-theme="dark"]{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa7c0; --accent:#4b7bec; --success:#2ecc71; --glass: rgba(255,255,255,0.03);
+    }
+
+    *{box-sizing:border-box;font-family:'Poppins',sans-serif}
+    body{margin:0;background:var(--bg);color:var(--muted);-webkit-font-smoothing:antialiased}
+    .navbar{position:fixed;top:0;left:0;right:0;height:64px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:12px 28px;box-shadow:0 6px 18px rgba(2,6,23,0.06);z-index:50}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand h1{margin:0;font-size:18px;color:var(--accent);letter-spacing:0.2px}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .icon-btn{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:8px;cursor:pointer}
+    main{padding:100px 28px 40px;max-width:1200px;margin:0 auto}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start}
+    @media (max-width:1000px){.grid{grid-template-columns:1fr;}.right-col{order:2}}
+
+    /* left column split */
+    .left{display:grid;grid-template-rows:auto auto;gap:18px}
+
+    .card{background:var(--card);padding:20px;border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.06)}
+    .form-row{display:flex;gap:10px}
+    .field{display:flex;flex-direction:column;margin-top:8px}
+    input,select{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:var(--glass);color:inherit}
+    label{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px}
+
+    .two-prop{display:flex;gap:16px}
+    .price{font-size:20px;color:var(--success);font-weight:700}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* breakdown */
+    .breakdown{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .bar{height:12px;background:#eee;border-radius:8px;overflow:hidden}
+    .bar > span{display:block;height:100%}
+
+    /* history */
+    .history{max-height:220px;overflow:auto;margin-top:10px}
+    .history-item{display:flex;justify-content:space-between;padding:8px;border-radius:8px;border:1px dashed rgba(0,0,0,0.04);margin-bottom:8px;background:transparent}
+
+    /* compare results */
+    .compare-results{display:flex;gap:10px;justify-content:space-between;margin-top:12px}
+    .col{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+
+    footer{margin-top:26px;text-align:center;color:var(--muted);font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .error{color:#ff6b6b;font-weight:600;margin-top:8px}
+
+    /* dark toggle */
+    .toggle{display:flex;align-items:center;gap:8px}
+    .small-muted{font-size:12px;color:var(--muted)}
+
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="brand">
+      <div style="font-size:22px">🏠</div>
+      <div>
+        <h1>Bangalore Home Price Predictor</h1>
+        <div class="small-muted">Compare · Explain · Save history</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="toggle">
+        <label class="small-muted" for="darkToggle">Dark mode</label>
+        <input id="darkToggle" type="checkbox" />
+      </div>
+      <button id="clearAllHistory" class="icon-btn">Clear History</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="left">
+        <!-- Form + Compare -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="muted">Compare two properties</div>
+              <h2 style="margin:6px 0 0">Enter details</h2>
+            </div>
+            <div class="small-muted">Sanity-check & quick explain</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="two-prop">
+              <!-- Property A -->
+              <div style="flex:1">
+                <div class="small-muted">Property A</div>
+                <div style="margin-top:8px">
+                  <label>Location</label>
+                  <select id="locA"></select>
+                  <label>Total sqft</label>
+                  <input id="sqftA" type="number" placeholder="e.g. 1200">
+                  <div class="form-row">
+                    <div style="flex:1">
+                      <label>BHK</label>
+                      <input id="bhkA" type="number" placeholder="3">
+                    </div>
+                    <div style="flex:1">
+                      <label>Bath</label>
+                      <input id="bathA" type="number" placeholder="2">
+                    </div>
+                  </div>
+
+                  <label>Parking</label>
+                  <input id="parkA" type="number" placeholder="0">
+
+                </div>
+              </div>
+
+              <!-- Property B -->
+              <div style="flex:1">
+                <div class="small-muted">Property B</div>
+                <div style="margin-top:8px">
+                  <label>Location</label>
+                  <select id="locB"></select>
+                  <label>Total sqft</label>
+                  <input id="sqftB" type="number">
+                  <div class="form-row">
+                    <div style="flex:1">
+                      <label>BHK</label>
+                      <input id="bhkB" type="number">
+                    </div>
+                    <div style="flex:1">
+                      <label>Bath</label>
+                      <input id="bathB" type="number">
+                    </div>
+                  </div>
+
+                  <label>Parking</label>
+                  <input id="parkB" type="number">
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:12px">
+              <button id="predictBoth" class="btn" style="flex:1">Predict & Compare</button>
+              <button id="predictSingle" class="icon-btn" style="width:140px">Predict A only</button>
+            </div>
+
+            <div id="formError" class="error" style="display:none"></div>
+
+            <!-- compare results -->
+            <div class="compare-results" id="compareBox" style="display:none">
+              <div class="col">
+                <div class="muted">Property A</div>
+                <div id="resultA" class="price">--</div>
+                <div id="breakA" class="small muted"></div>
+              </div>
+              <div class="col">
+                <div class="muted">Property B</div>
+                <div id="resultB" class="price">--</div>
+                <div id="breakB" class="small muted"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Breakdown & History -->
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:18px">
+          <!-- Breakdown -->
+          <div class="card">
+            <h3 style="margin:0 0 8px">Price Breakdown (explainable)</h3>
+            <div class="muted">Heuristic decomposition — shows how the estimated price is allocated</div>
+
+            <div id="breakdownPanel" class="breakdown" style="margin-top:12px">
+              <!-- inserted dynamically -->
+            </div>
+            <div style="margin-top:8px" class="small-muted">Note: weights are frontend heuristics (60% area, 20% location, 10% bath, 10% other).</div>
+          </div>
+
+          <!-- History -->
+          <div class="card">
+            <h3 style="margin:0 0 8px">Prediction History</h3>
+            <div class="muted">Saved locally in your browser</div>
+            <div class="history" id="historyList" style="margin-top:10px"></div>
+
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button id="exportCsv" class="btn" style="flex:1;background:#16a085">Export CSV</button>
+              <button id="clearLocal" class="icon-btn" style="width:120px">Clear</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-col">
+        <div class="card">
+          <h3 style="margin:0 0 8px">Sanity Check</h3>
+          <div class="muted">Example sample outputs (quick sanity):</div>
+          <pre id="sanityList" style="background:transparent;border-radius:8px;padding:12px;margin-top:12px;color:var(--muted);font-size:13px">
+Index: 7878 Predicted Price (Lakhs): 88.25
+Index: 3224 Predicted Price (Lakhs): 196.24
+Index: 1919 Predicted Price (Lakhs): 53.06
+Index: 4432 Predicted Price (Lakhs): 64.90
+Index: 4835 Predicted Price (Lakhs): 30.38
+          </pre>
+
+          <hr style="margin:14px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+          <h3 style="margin:0 0 8px">Deployment</h3>
+          <div class="muted">This UI uses Flask endpoints:
+            <ul style="margin:6px 0 0;padding-left:18px;color:var(--muted)">
+              <li><code>/get_location_names</code> (GET) — returns locations JSON</li>
+              <li><code>/predict_home_price</code> (POST) — returns {"estimated_price": number}</li>
+            </ul>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small-muted">Tip:</div>
+            <ol style="padding-left:18px;color:var(--muted);font-size:13px">
+              <li>Place this file at <code>templates/index.html</code> in your Flask app.</li>
+              <li>No backend code changes required for the heuristic breakdown.</li>
+              <li>Enable CORS only if serving from different origin.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>© 2025 — Bangalore Home Price Prediction · Built with ML · UI v1</footer>
+  </main>
+
+<script>
+/* -------------- Utilities & init -------------- */
+const qs = id => document.getElementById(id);
+const showError = (msg) => {
+  const el = qs('formError');
+  el.innerText = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+let locations = [];
+
+/* Dark mode */
+const themeKey = 'bhp_theme';
+function applyTheme(t){
+  if(t==='dark'){ document.documentElement.setAttribute('data-theme','dark'); qs('darkToggle').checked=true; localStorage.setItem(themeKey,'dark'); }
+  else { document.documentElement.removeAttribute('data-theme'); qs('darkToggle').checked=false; localStorage.setItem(themeKey,'light'); }
+}
+qs('darkToggle').addEventListener('change', (e)=>{
+  applyTheme(e.target.checked ? 'dark' : 'light');
+});
+applyTheme(localStorage.getItem(themeKey) || 'light');
+
+/* Load locations from backend and fill both selects */
+async function loadLocations(){
+  try{
+    const res = await fetch('/get_location_names');
+    const data = await res.json();
+    locations = data.locations || [];
+    const selA = qs('locA'), selB = qs('locB');
+    selA.innerHTML = ''; selB.innerHTML='';
+    locations.forEach(loc => {
+      const o1 = document.createElement('option'); o1.value = loc; o1.textContent = loc; selA.appendChild(o1);
+      const o2 = document.createElement('option'); o2.value = loc; o2.textContent = loc; selB.appendChild(o2);
+    });
+  }catch(err){
+    console.error('Failed to load locations', err);
+    // fallback common list
+    const fallback = ['whitefield','koramangala','indiranagar','jp nagar','yelahanka'];
+    fallback.forEach(loc=>{
+      const o1 = document.createElement('option'); o1.value = loc; o1.textContent = loc; qs('locA').appendChild(o1);
+      const o2 = document.createElement('option'); o2.value = loc; o2.textContent = loc; qs('locB').appendChild(o2);
+    });
+  }
+}
+loadLocations();
+
+/* localStorage history helpers */
+const HISTORY_KEY = 'bhp_history_v1';
+function getHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }catch(e){ return []; } }
+function saveHistory(h){ localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
+function addHistory(item){
+  const h = getHistory(); h.unshift(item); if(h.length>50) h.pop(); saveHistory(h); renderHistory();
+}
+function clearHistory(){ localStorage.removeItem(HISTORY_KEY); renderHistory(); }
+function renderHistory(){
+  const list = qs('historyList'); list.innerHTML = ''; const h = getHistory();
+  if(h.length===0){ list.innerHTML = '<div class="muted">No predictions yet</div>'; return; }
+  h.forEach(it=>{
+    const div = document.createElement('div'); div.className='history-item';
+    div.innerHTML = `<div>${it.location} · ${it.bhk}BHK · ${it.total_sqft} sqft</div><div style="text-align:right"><div style="font-weight:700">₹ ${it.estimated_price} Lakhs</div><div class="small-muted">${it.when}</div></div>`;
+    list.appendChild(div);
+  });
+}
+qs('clearLocal').addEventListener('click', ()=>{ if(confirm('Clear history?')) clearHistory(); });
+qs('clearAllHistory').addEventListener('click', ()=>{ if(confirm('Clear local history?')) clearHistory(); });
+qs('exportCsv').addEventListener('click', ()=> {
+  const rows = getHistory().map(h => [h.when,h.location,h.total_sqft,h.bhk,h.bath,h.estimated_price].join(','));
+  const csv = 'when,location,sqft,bhk,bath,price_lakhs\\n' + rows.join('\\n');
+  const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download='prediction_history.csv'; a.click(); URL.revokeObjectURL(url);
+});
+
+/* -------------- Prediction logic -------------- */
+function validateInputs(prefix=''){
+  const sqft = Number(qs(prefix+'sqftA'.replace('A',''))); // not used - keep generic
+  // generic check called per property below
+}
+async function predictProperty(payload){
+  // payload: {location, total_sqft, bhk, bath, ...}
+  const resp = await fetch('/predict_home_price', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  if(!resp.ok){ const text = await resp.text(); throw new Error('Prediction endpoint error: ' + text); }
+  const data = await resp.json();
+  if(data.error) throw new Error(data.error);
+  return data.estimated_price;
+}
+
+/* breakdown heuristics */
+function computeBreakdown(predPrice, payload){
+  // predPrice in lakhs (number)
+  // We'll compute contributions proportional to plausible factors.
+  const sqft = Number(payload.total_sqft) || 1000;
+  const bhk = Number(payload.bhk) || 1;
+  const bath = Number(payload.bath) || 1;
+  const park = Number(payload.parking || payload.park || payload.parking_spaces || 0) || 0;
+  // Normalize area factor: area score = sqft / 1000 (cap)
+  const areaScore = Math.min(sqft/1200, 2.0);
+  const bathScore = Math.min(bath/3, 2.0);
+  const parkScore = Math.min(1 + park*0.2, 1.5);
+  // weights: area 0.6, location 0.2, bath 0.1, other 0.1
+  const areaPart = predPrice * 0.60 * (areaScore/1.0) / ( (areaScore) ); // simplified
+  const locationPart = predPrice * 0.20;
+  const bathPart = predPrice * 0.10 * (bathScore/1.0);
+  const otherPart = predPrice * 0.10 * (parkScore/1.0);
+  // Ensure sum ~ predPrice (scale if needed)
+  const rawSum = areaPart + locationPart + bathPart + otherPart;
+  const scale = predPrice / rawSum;
+  const a = +(areaPart*scale).toFixed(2), l=+(locationPart*scale).toFixed(2), b=+(bathPart*scale).toFixed(2), o=+(otherPart*scale).toFixed(2);
+  return [
+    {name:'Area (sqft)', value:a, pct: Math.round(a/predPrice*100)},
+    {name:'Location', value:l, pct: Math.round(l/predPrice*100)},
+    {name:'Bathrooms', value:b, pct: Math.round(b/predPrice*100)},
+    {name:'Other (parking/age/facing)', value:o, pct: Math.round(o/predPrice*100)}
+  ];
+}
+
+/* render breakdown bars */
+function renderBreakdown(blockId, breakdown){
+  const el = qs(blockId);
+  el.innerHTML = '';
+  breakdown.forEach(item=>{
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div style="display:flex;justify-content:space-between"><div class="small-muted">${item.name}</div><div><strong>₹ ${item.value}L</strong> <span class="small-muted">(${item.pct}%)</span></div></div>
+      <div class="bar" style="margin-top:6px"><span style="width:${Math.max(item.pct,2)}%;background:linear-gradient(90deg,var(--accent),#22c1c3)"></span></div>`;
+    el.appendChild(wrap);
+  });
+}
+
+/* Single property predict (A only) */
+qs('predictSingle').addEventListener('click', async ()=>{
+  try{
+    showError('');
+    const payload = {
+      location: qs('locA').value,
+      total_sqft: Number(qs('sqftA').value),
+      bhk: Number(qs('bhkA').value),
+      bath: Number(qs('bathA').value),
+      parking: Number(qs('parkA').value)
+    };
+    // basic validation
+    if(!payload.total_sqft || !payload.bhk) { showError('Please enter area and BHK for Property A'); return; }
+
+    qs('compareBox').style.display='none';
+    qs('resultA').innerText = 'Predicting...';
+    const price = await predictProperty(payload);
+    qs('resultA').innerText = `₹ ${(+price).toFixed(2)} Lakhs`;
+    const breakdown = computeBreakdown(price, payload);
+    renderBreakdown('breakdownPanel', breakdown);
+    const when = new Date().toLocaleString();
+    addHistory({...payload, estimated_price: (+price).toFixed(2), when});
+    qs('compareBox').style.display='block';
+    qs('breakA').innerText = breakdown.map(x=>`${x.name}: ₹${x.value}L (${x.pct}%)`).join(' · ');
+  }catch(err){
+    console.error(err); showError(err.message || 'Prediction failed');
+  }
+});
+
+/* Predict both and compare */
+qs('predictBoth').addEventListener('click', async ()=>{
+  try{
+    showError('');
+    const pa = {
+      location: qs('locA').value,
+      total_sqft: Number(qs('sqftA').value),
+      bhk: Number(qs('bhkA').value),
+      bath: Number(qs('bathA').value),
+      parking: Number(qs('parkA').value)
+    };
+    const pb = {
+      location: qs('locB').value,
+      total_sqft: Number(qs('sqftB').value),
+      bhk: Number(qs('bhkB').value),
+      bath: Number(qs('bathB').value),
+      parking: Number(qs('parkB').value)
+    };
+    if(!pa.total_sqft || !pa.bhk || !pb.total_sqft || !pb.bhk){ showError('Fill area and BHK for both properties'); return; }
+    qs('resultA').innerText='Predicting...'; qs('resultB').innerText='Predicting...';
+    qs('compareBox').style.display='none';
+    const [priceA, priceB] = await Promise.all([ predictProperty(pa), predictProperty(pb) ]);
+    qs('resultA').innerText = `₹ ${(+priceA).toFixed(2)} Lakhs`;
+    qs('resultB').innerText = `₹ ${(+priceB).toFixed(2)} Lakhs`;
+
+    const breakdownA = computeBreakdown(priceA, pa);
+    const breakdownB = computeBreakdown(priceB, pb);
+    renderBreakdown('breakdownPanel', breakdownA); // show A breakdown by default
+    qs('breakA').innerText = breakdownA.map(x=>`${x.name}: ₹${x.value}L (${x.pct}%)`).join(' · ');
+    qs('breakB').innerText = breakdownB.map(x=>`${x.name}: ₹${x.value}L (${x.pct}%)`).join(' · ');
+
+    addHistory({...pa, estimated_price: (+priceA).toFixed(2), when: new Date().toLocaleString()});
+    addHistory({...pb, estimated_price: (+priceB).toFixed(2), when: new Date().toLocaleString()});
+    qs('compareBox').style.display='block';
+  }catch(err){
+    console.error(err); showError(err.message || 'Prediction failed');
+  }
+});
+
+/* init render */
+renderHistory();
+
+</script>
+</body>
+</html>
